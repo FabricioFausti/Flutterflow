@@ -1,0 +1,31 @@
+import 'dart:convert';
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:timeago/timeago.dart' as timeago;
+import '/flutter_flow/lat_lng.dart';
+import '/flutter_flow/place.dart';
+import '/flutter_flow/uploaded_file.dart';
+import '/flutter_flow/custom_functions.dart';
+import '/backend/backend.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '/backend/schema/structs/index.dart';
+import '/auth/firebase_auth/auth_util.dart';
+
+String? corParaString(Color? cor) {
+  /// MODIFY CODE ONLY BELOW THIS LINE
+
+  // Verifica se a cor é nula
+  if (cor == null) {
+    return ''; // Ou outro valor padrão, dependendo do seu caso
+  }
+
+  // Usa a classe Color para obter os componentes RGB e os converte para uma string hexadecimal
+  return '#${cor.red.toRadixString(16).padLeft(2, '0')}'
+      '${cor.green.toRadixString(16).padLeft(2, '0')}'
+      '${cor.blue.toRadixString(16).padLeft(2, '0')}';
+
+  /// MODIFY CODE ONLY ABOVE THIS LINE
+}
