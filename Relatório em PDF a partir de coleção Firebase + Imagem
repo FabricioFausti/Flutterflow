@@ -1,3 +1,8 @@
+//Para que o Firebase permita leitura da imagem é necessário configura-lo.
+//Link para configuração do Firebase:
+//https://docs.flutterflow.io/actions/actions/utilities/upload-data#web-access-for-pdfs-and-other-files
+
+
 // Automatic FlutterFlow imports
 import '/backend/backend.dart';
 import '/backend/schema/structs/index.dart';
