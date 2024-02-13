@@ -1,0 +1,261 @@
+// Automatic FlutterFlow imports
+import '/backend/backend.dart';
+import '/backend/schema/structs/index.dart';
+import '/flutter_flow/flutter_flow_theme.dart';
+import '/flutter_flow/flutter_flow_util.dart';
+import '/custom_code/actions/index.dart'; // Imports other custom actions
+import '/flutter_flow/custom_functions.dart'; // Imports custom functions
+import 'package:flutter/material.dart';
+// Begin custom action code
+// DO NOT REMOVE OR MODIFY THE CODE ABOVE!
+
+import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/pdf.dart';
+import 'package:printing/printing.dart';
+
+Future criarPDFDevolucoes(
+  List<EventoDevolucoesRecord> documentos,
+  String nomeEvento,
+  String nomeUsuario,
+  String corPrimaria,
+  String corSecundaria,
+) async {
+  final pdf = pw.Document();
+  int contador = 1;
+  int totalQuantidade = 0;
+
+  List<pw.Widget> tableRows = [];
+  //adicionar o primeiro item na lista para ser usado como cabeçalho da tabela.
+  tableRows.add(
+    pw.Container(
+      color: PdfColor.fromHex(corPrimaria),
+      child: pw.Row(
+        children: [
+          pw.Container(
+            width: 30,
+            child: pw.Text(
+              'Item',
+              textAlign: pw.TextAlign.center,
+              style: pw.TextStyle(
+                fontSize: 9,
+                color: PdfColors.white,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+          ),
+          pw.Expanded(
+            child: pw.Text(
+              'Descrição',
+              style: pw.TextStyle(
+                fontSize: 9,
+                color: PdfColors.white,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+          ),
+          pw.Expanded(
+            child: pw.Padding(
+              padding: pw.EdgeInsets.symmetric(vertical: 8.0),
+              child: pw.Text(
+                'Quantidade',
+                textAlign: pw.TextAlign.center,
+                style: pw.TextStyle(
+                  fontSize: 9,
+                  color: PdfColors.white,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          pw.Expanded(
+            child: pw.Text(
+              'Armazenamento',
+              style: pw.TextStyle(
+                fontSize: 9,
+                color: PdfColors.white,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+          ),
+          pw.Expanded(
+            child: pw.Text(
+              'Observações',
+              style: pw.TextStyle(
+                fontSize: 9,
+                color: PdfColors.white,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+
+  //Laço para gerar as linhas da tabela
+  for (var i = 0; i < documentos.length; i++) {
+    final documento = documentos[i];
+    final isEven = i.isEven;
+
+    tableRows.add(
+      pw.Container(
+        color: isEven
+            ? PdfColor.fromHex(corSecundaria)
+            : PdfColor.fromHex('#FFFFFF'),
+        child: pw.Row(
+          children: [
+            pw.Container(
+              width: 30,
+              child: pw.Text(
+                contador.toString().padLeft(2, '0'),
+                textAlign: pw.TextAlign.center,
+                style: pw.TextStyle(fontSize: 9),
+              ),
+            ),
+            pw.Expanded(
+              child: pw.Text(
+                documento.descricao,
+                style: pw.TextStyle(fontSize: 9),
+              ),
+            ),
+            pw.Expanded(
+              child: pw.Padding(
+                padding: pw.EdgeInsets.symmetric(vertical: 8.0),
+                child: pw.Text(
+                  documento.quantidade.toString().padLeft(2, '0'),
+                  textAlign: pw.TextAlign.center,
+                  style: pw.TextStyle(fontSize: 9),
+                ),
+              ),
+            ),
+            pw.Expanded(
+              child: pw.Text(
+                documento.armazenamento,
+                style: pw.TextStyle(fontSize: 9),
+              ),
+            ),
+            pw.Expanded(
+              child: pw.Text(
+                documento.observacao,
+                style: pw.TextStyle(fontSize: 9),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    //ao final de cada loop do nosso laço é soma +1 no contador e também é somado o conteudo "quantidade" dentro do documento com a variavel totalQuantidade.
+    contador++;
+    totalQuantidade += documento.quantidade;
+  }
+
+  //formatar margens da pagina
+  final PdfPageFormat pageFormat = PdfPageFormat(
+    PdfPageFormat.a4.width,
+    PdfPageFormat.a4.height,
+    marginLeft: 28.35 * 0.5,
+    marginRight: 28.35 * 0.5,
+    marginTop: 28.35 * 0.5,
+    marginBottom: 28.35 * 0.5,
+  );
+
+  //adequação da variavel contador
+  contador -= 1;
+  if (contador < 0) {
+    contador = 0;
+  }
+
+  //faz a leitura/download da imagem no storage [necessário configurar o banco de dados antes!]
+  final netImage = await networkImage(
+      'https://firebasestorage.googleapis.com/v0/b/qrmind-7a1ed.appspot.com/o/EX.png?alt=media&token=c34cb504-c6bf-4820-bd44-630b78352e97');
+
+  //agora vamos começar a montar a pagina!
+  pdf.addPage(
+    pw.MultiPage(
+      pageFormat: pageFormat,
+      build: (context) => [
+        pw.Column(
+          children: [
+            pw.Container(
+              width: PdfPageFormat.a4.width,
+              color: PdfColor.fromHex(corPrimaria),
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.center,
+                children: [
+                  pw.Text('\n'),
+                  //inserir a imagem
+                  pw.LayoutBuilder(
+                    builder: (context, constraints) {
+                      // Certifica-se de que constraints não é nulo antes de acessar maxWidth
+                      double larguraImagem = constraints?.maxWidth ?? 0.0;
+                      larguraImagem *= 0.70;
+                      return pw.Image(
+                        netImage,
+                        width: larguraImagem,
+                      );
+                    },
+                  ),
+
+                  pw.Text(
+                    '\n' + nomeEvento + ' - Lista de Devoluções',
+                    textAlign: pw.TextAlign.center,
+                    style: pw.TextStyle(
+                      fontWeight: pw.FontWeight.bold,
+                      fontSize: 15,
+                      color: PdfColors.white,
+                      background: pw.BoxDecoration(
+                        color: PdfColor.fromHex(corPrimaria),
+                      ),
+                    ),
+                  ),
+                  pw.SizedBox(height: 6),
+                ],
+              ),
+            ),
+            ...tableRows,
+            pw.Container(
+              margin: pw.EdgeInsets.only(top: 10),
+              alignment: pw.Alignment.centerLeft,
+              child: pw.Text(
+                'Total de itens: $contador',
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 9,
+                ),
+              ),
+            ),
+            pw.Container(
+              alignment: pw.Alignment.centerLeft,
+              child: pw.Text(
+                'Quantidade Total: $totalQuantidade',
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 9,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+
+  await Printing.layoutPdf(
+    onLayout: (PdfPageFormat format) async => pdf.save(),
+  );
+}
+
+//daqui pra baixo é desnecessário
+pw.Container _buildHeaderCell(String text) {
+  return pw.Container(
+    padding: pw.EdgeInsets.all(5),
+    child: pw.Text(
+      text,
+      style: pw.TextStyle(
+        fontSize: 9,
+        color: PdfColors.white,
+      ),
+    ),
+  );
+}
